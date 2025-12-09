@@ -1,0 +1,30 @@
+{% extends "itreporting/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<h1>{{ user.username }}</h1>
+
+<!-- REMOVE this line -->
+{# <img> {{user.img}} </img> #}
+
+<!-- Correct profile image -->
+<img 
+    src="{{ user.profile.image.url }}" 
+    alt="Profile Picture"
+    class="img-thumbnail"
+    style="width:150px; height:150px; object-fit:cover;"
+>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Student IT Services - Profile Details</legend>
+        {{ u_form|crispy }} 
+        {{ p_form|crispy }} 
+    </fieldset>
+    <div class="form-group">
+        <button class="btn btn-outline-info" type="submit">Update</button>
+    </div>
+</form>
+
+{% endblock content %}
