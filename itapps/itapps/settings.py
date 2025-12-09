@@ -22,8 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', '030415')
 
-WEBSITE_HOSTNAME = os.environ.get('c2027394-cgaraaddfugnb5ce.uksouth-01.azurewebsites.net', None) 
+WEBSITE_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME', None) 
 DEBUG = WEBSITE_HOSTNAME == None
+
 
 if DEBUG: 
 
