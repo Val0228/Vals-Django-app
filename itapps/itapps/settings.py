@@ -87,29 +87,34 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'itapps.wsgi.application'
 
+print("======= DJANGO DATABASE SETTINGS =======")
+print("ENGINE:", 'django.db.backends.mysql')
+print("NAME:", os.getenv('AZURE_DB_NAME'))
+print("USER:", os.getenv('AZURE_DB_USER'))
+print("PASSWORD:", os.getenv('AZURE_DB_PASSWORD'))  # Remove before deploying!
+print("HOST:", os.getenv('AZURE_DB_HOST'))
+print("PORT:", os.getenv('AZURE_DB_PORT', '3306'))
+print("========================================")
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = { 
-
-    'default': { 
-
-        'ENGINE': 'django.db.backends.mysql', 
-        'NAME': os.environ['AZURE_DB_NAME'], 
-        'HOST': os.environ['AZURE_DB_HOST'], 
-        'PORT': os.environ['AZURE_DB_PORT'], 
-        'USER': os.environ['AZURE_DB_USER'], 
-        'PASSWORD': os.environ['AZURE_DB_PASSWORD'], 
-        'PORT': os.environ['AZURE_DB_PORT'],
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('AZURE_DB_NAME'),
+        'USER': os.getenv('AZURE_DB_USER'),
+        'PASSWORD': os.getenv('AZURE_DB_PASSWORD'),
+        'HOST': os.getenv('AZURE_DB_HOST'),
+        'PORT': os.getenv('AZURE_DB_PORT', '3306'),
         'OPTIONS': {
             'ssl': {
-                'ca': '/etc/ssl/certs/ca-certificates.crt',
-            },
-        },
+                'ca': '/etc/ssl/certs/ca-certificates.crt'
+            }
+        }
     }
-     
 }
+
 
 
 
