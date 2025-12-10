@@ -102,13 +102,16 @@ DATABASES = {
         'PASSWORD': os.getenv('AZURE_DB_PASSWORD'),
         'HOST': os.getenv('AZURE_DB_HOST'),
         'PORT': os.getenv('AZURE_DB_PORT', '3306'),
-        'OPTIONS': {
-            'ssl': {
-                'ca': '/etc/ssl/certs/ca-certificates.crt'
-            }
-        }
     }
 }
+
+# ✔ Enable SSL only when running on Azure App Service
+if os.getenv('WEBSITE_SITE_NAME'):
+    DATABASES['default']['OPTIONS'] = {
+        'ssl': {
+            'ca': '/etc/ssl/certs/ca-certificates.crt'
+        }
+    }
 
 
 
