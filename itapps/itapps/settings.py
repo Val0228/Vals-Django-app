@@ -94,24 +94,22 @@ print("========================================")
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
+DDATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('AZURE_DB_NAME'),
-        'USER': os.getenv('AZURE_DB_USER'),
-        'PASSWORD': os.getenv('AZURE_DB_PASSWORD'),
-        'HOST': os.getenv('AZURE_DB_HOST'),
-        'PORT': os.getenv('AZURE_DB_PORT', '3306'),
+        'NAME': 'development',
+        'USER': 'c2027394',
+        'PASSWORD': '_Valery2003_EA',
+        'HOST': 'c2027394.mysql.database.azure.com',
+        'PORT': '3306',
+        'OPTIONS': {
+            'ssl': {
+                'ca': '/etc/ssl/certs/ca-certificates.crt'
+            }
+        }
     }
 }
 
-# ✔ Enable SSL only when running on Azure App Service
-if os.getenv('WEBSITE_SITE_NAME'):
-    DATABASES['default']['OPTIONS'] = {
-        'ssl': {
-            'ca': '/etc/ssl/certs/ca-certificates.crt'
-        }
-    }
 
 
 
