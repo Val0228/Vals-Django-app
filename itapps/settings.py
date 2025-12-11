@@ -94,7 +94,7 @@ print("========================================")
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DDATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'development',
