@@ -170,6 +170,11 @@ CACHES = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+# Tell Django where to find static files in your apps
+STATICFILES_DIRS = [
+    BASE_DIR / 'itreporting' / 'static',
+]
+
 # STATIC_URL = '/static/' (OLD STATIC)
 
 
