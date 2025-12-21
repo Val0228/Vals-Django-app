@@ -1,0 +1,197 @@
+{% extends "itreporting/base.html" %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="about-header">
+    <h1>About UNI of Online Learning</h1>
+    <p class="lead">Excellence in Education, Innovation in Learning</p>
+</div>
+
+<!-- Internal Navigation with Weather -->
+<div class="about-nav-section">
+    <div class="row">
+        <div class="col-md-8 mb-3">
+            <div class="about-nav-card">
+                <h4>Quick Navigation</h4>
+                <nav class="about-nav">
+                    <a href="#overview" class="about-nav-link">Overview</a>
+                    <a href="#mission" class="about-nav-link">Our Mission</a>
+                    <a href="#values" class="about-nav-link">Our Values</a>
+                    <a href="#programs" class="about-nav-link">Programs</a>
+                </nav>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <!-- Compact Weather Widget -->
+            {% if weather %}
+                <div class="weather-widget-compact">
+                    <div class="weather-widget-header">
+                        <span class="weather-widget-title">🌤️ Campus Weather</span>
+                        <a href="{% url 'itreporting:weather' %}" class="weather-widget-link" title="View full forecast">→</a>
+                    </div>
+                    <div class="weather-widget-content">
+                        <div class="weather-widget-main">
+                            <img src="{{ weather.icon_url }}" alt="{{ weather.description }}" class="weather-widget-icon">
+                            <div class="weather-widget-temp">
+                                <span class="temp-value">{{ weather.temperature }}</span>
+                                <span class="temp-unit">°C</span>
+                            </div>
+                        </div>
+                        <div class="weather-widget-info">
+                            <p class="weather-widget-desc">{{ weather.description }}</p>
+                            <p class="weather-widget-location">{{ weather.city }}, {{ weather.country }}</p>
+                            <div class="weather-widget-details">
+                                <span class="weather-detail-mini">💨 {{ weather.wind_speed }} km/h</span>
+                                <span class="weather-detail-mini">💧 {{ weather.humidity }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Section 1: Overview -->
+<section id="overview" class="about-section">
+    <div class="about-content-card">
+        <div class="about-section-header">
+            <h2>🏛️ University Overview</h2>
+        </div>
+        <div class="about-section-body">
+            <p class="lead">UNI of Online Learning is a leading institution committed to providing world-class online education and fostering innovation in digital learning.</p>
+            <p>Established with a vision to make quality education accessible to everyone, we have been at the forefront of online learning for over two decades. Our university combines traditional academic excellence with cutting-edge technology to deliver an unparalleled educational experience.</p>
+            <p>With a diverse community of students from around the globe, we pride ourselves on creating an inclusive learning environment that encourages collaboration, critical thinking, and personal growth. Our comprehensive range of programs spans multiple disciplines, ensuring that every student can find their path to success.</p>
+            <div class="row mt-4">
+                <div class="col-md-4 text-center mb-3">
+                    <div class="about-stat-box">
+                        <h3 class="text-primary">50,000+</h3>
+                        <p>Active Students</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <div class="about-stat-box">
+                        <h3 class="text-success">200+</h3>
+                        <p>Expert Faculty</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-3">
+                    <div class="about-stat-box">
+                        <h3 class="text-info">100+</h3>
+                        <p>Online Programs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2: Our Mission -->
+<section id="mission" class="about-section">
+    <div class="about-content-card">
+        <div class="about-section-header">
+            <h2>🎯 Our Mission</h2>
+        </div>
+        <div class="about-section-body">
+            <p>Our mission is to transform lives through accessible, high-quality online education that prepares students for success in an ever-evolving global landscape.</p>
+            <div class="mission-points">
+                <div class="mission-item">
+                    <h4>📚 Academic Excellence</h4>
+                    <p>We maintain the highest standards of academic rigor, ensuring our programs meet international benchmarks and industry requirements.</p>
+                </div>
+                <div class="mission-item">
+                    <h4>🌍 Global Accessibility</h4>
+                    <p>We break down geographical barriers, making world-class education available to students regardless of their location or background.</p>
+                </div>
+                <div class="mission-item">
+                    <h4>💡 Innovation</h4>
+                    <p>We continuously innovate our teaching methods and curriculum to stay ahead of technological and industry trends.</p>
+                </div>
+                <div class="mission-item">
+                    <h4>🤝 Student Support</h4>
+                    <p>We provide comprehensive support services to ensure every student has the resources they need to succeed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 3: Our Values -->
+<section id="values" class="about-section">
+    <div class="about-content-card">
+        <div class="about-section-header">
+            <h2>💎 Our Core Values</h2>
+        </div>
+        <div class="about-section-body">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="value-card">
+                        <div class="value-icon">✨</div>
+                        <h4>Excellence</h4>
+                        <p>We strive for excellence in everything we do, from curriculum design to student support services.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="value-card">
+                        <div class="value-icon">🤝</div>
+                        <h4>Integrity</h4>
+                        <p>We conduct ourselves with honesty, transparency, and ethical behavior in all our interactions.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="value-card">
+                        <div class="value-icon">🌐</div>
+                        <h4>Diversity</h4>
+                        <p>We celebrate diversity and create an inclusive environment where all voices are heard and valued.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="value-card">
+                        <div class="value-icon">🚀</div>
+                        <h4>Innovation</h4>
+                        <p>We embrace new technologies and methodologies to enhance the learning experience.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 4: Programs -->
+<section id="programs" class="about-section">
+    <div class="about-content-card">
+        <div class="about-section-header">
+            <h2>📖 Our Programs</h2>
+        </div>
+        <div class="about-section-body">
+            <p>Sheffield Hallam University offers a wide range of online programs designed to meet the needs of today's learners. Our curriculum is regularly updated to reflect current industry standards and emerging trends.</p>
+            <div class="programs-grid">
+                <div class="program-category">
+                    <h4>Core Programs</h4>
+                    <p>Essential courses that form the foundation of your academic journey, including Online Marketing, Online Coding, and Online AI Learning.</p>
+                </div>
+                <div class="program-category">
+                    <h4>Optional Courses</h4>
+                    <p>Specialized courses like Video Editing and Photoshop that allow you to develop specific skills and interests.</p>
+                </div>
+                <div class="program-category">
+                    <h4>Elective Modules</h4>
+                    <p>Leadership and Team-Building classes designed to enhance your soft skills and professional development.</p>
+                </div>
+                <div class="program-category">
+                    <h4>Foundation Courses</h4>
+                    <p>Starter classes that help new students acclimate to online learning and build essential academic skills.</p>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'itreporting:module-list' %}" class="btn btn-primary btn-lg">Explore Our Modules</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Back to Top -->
+<div class="text-center mt-4">
+    <a href="#overview" class="btn btn-outline-primary">Back to Top ↑</a>
+</div>
+{% endblock %}

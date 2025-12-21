@@ -1,0 +1,264 @@
+{% load static %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+{% endfor %}
+{% endif %}
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet" 
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+    crossorigin="anonymous"
+  >
+
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
+  
+  <!-- n8n Chat Widget CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+
+  <title>UNI of Online Learning - {{title}}</title>
+</head>
+<body>
+  <div class="container">
+    <header class="site-header">
+      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+        <div class="container">
+          <a class="navbar-brand mr-4" href="{% url 'itreporting:home' %}">
+            UNI of Online Learning
+          </a>
+         <!-- replace in your button -->
+         <button class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarToggle"
+              aria-controls="navbarToggle"
+              aria-expanded="false"
+              aria-label="Toggle navigation">
+             <span class="navbar-toggler-icon"></span>
+         </button>
+
+          <div class="collapse navbar-collapse" id="navbarToggle">
+            <div class="navbar-nav mr-auto">
+              <a class="nav-item nav-link" href="{% url 'itreporting:home' %}">Home</a>
+              <a class="nav-item nav-link" href="{% url 'itreporting:module-list' %}">Modules</a>
+              <a class="nav-item nav-link" href="{% url 'itreporting:report'%}">Report</a>
+              <a class="nav-item nav-link" href="{% url 'itreporting:weather' %}">Weather</a>
+              <a class="nav-item nav-link" href="{% url 'itreporting:aboutus' %}">About</a>
+              <a class="nav-item nav-link" href="{% url 'itreporting:contactus' %}">Contact</a>
+
+            </div>
+            <!-- Navbar Right Side -->
+            <div class="navbar-nav">
+              {% if user.is_authenticated %}
+              <a class="nav-item nav-link" href="{% url 'itreporting:issue-create' %}">Report New Issue</a>
+              <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
+              <form method="post" id="frm_logout" action="{% url 'logout' %}"
+               style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="nav-item nav-link"
+               style="background:none; border:none; cursor:pointer;">Logout</button>
+              </form>
+              {% else %}
+              <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+              <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="row">
+      <div class="col-md-8">
+        {% block content %}{% endblock %}
+      </div>
+      <div class="col-md-4">
+        <div class="content-section">
+          {% if show_news_feed %}
+          <div class="news-header">
+            <h3>General Information</h3>
+            <button id="refresh-news-btn" class="btn-refresh-news" title="Refresh News" aria-label="Refresh News">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 4V10H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M23 20V14H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14L18.36 18.36A9 9 0 0 1 3.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <p class="text-muted">
+            Live News Feed
+          </p>
+          <div id="news-feed-container" class="news-feed" data-news-url="{% url 'itreporting:news-api' %}">
+            {% if news_articles %}
+              {% for article in news_articles %}
+                <div class="news-item">
+                  <div class="news-content">
+                    <h6 class="news-title">
+                      <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer">
+                        {{ article.title|truncatewords:10 }}
+                      </a>
+                    </h6>
+                    {% if article.snippet %}
+                      <p class="news-snippet">{{ article.snippet|truncatewords:15 }}</p>
+                    {% elif article.description %}
+                      <p class="news-snippet">{{ article.description|truncatewords:15 }}</p>
+                    {% endif %}
+                    <div class="news-meta">
+                      <span class="news-source">{{ article.source }}</span>
+                      {% if article.published_at %}
+                        <span class="news-date">{{ article.published_at|date:"M d, Y" }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="news-item">
+                <p class="text-muted">Loading news...</p>
+              </div>
+            {% endif %}
+          </div>
+          <div id="news-loading" class="news-loading" style="display: none;">
+            <div class="news-loading-spinner"></div>
+            <p class="text-muted">Refreshing news...</p>
+          </div>
+          {% else %}
+          <h3>General Information</h3>
+          <p class="text-muted">
+            Live News Feed
+          </p>
+          <ul class="list-group">
+            <li class="list-group-item list-group-item-light">Latest Issues Reported</li>
+            <li class="list-group-item list-group-item-light">IT Policies</li>
+            <li class="list-group-item list-group-item-light">IT Regulations</li>
+            <li class="list-group-item list-group-item-light">Upcoming Events</li>
+          </ul>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script 
+    src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous">
+  </script>
+  <script 
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+    integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+    crossorigin="anonymous">
+  </script>
+  
+  <!-- n8n Chat Widget JavaScript -->
+  <script type="module">
+    import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+    createChat({
+      webhookUrl: 'https://oemarketing.app.n8n.cloud/webhook/bb9b713c-07ba-4e78-8c8e-a45cb5b7f4c0/chat'
+    });
+  </script>
+  
+  <!-- News Feed Refresh JavaScript -->
+  {% if show_news_feed %}
+  <script>
+    (function() {
+      const refreshBtn = document.getElementById('refresh-news-btn');
+      const newsFeedContainer = document.getElementById('news-feed-container');
+      const newsLoading = document.getElementById('news-loading');
+      
+      if (refreshBtn && newsFeedContainer) {
+        const newsApiUrl = newsFeedContainer.getAttribute('data-news-url');
+        
+        refreshBtn.addEventListener('click', function() {
+          // Disable button and show loading
+          refreshBtn.disabled = true;
+          refreshBtn.classList.add('refreshing');
+          newsFeedContainer.style.opacity = '0.5';
+          newsLoading.style.display = 'block';
+          
+          // Clear cache by adding timestamp
+          const url = newsApiUrl + '?refresh=' + Date.now();
+          
+          fetch(url, {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin'
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.articles && data.articles.length > 0) {
+              // Clear existing news
+              newsFeedContainer.innerHTML = '';
+              
+              // Add new articles
+              data.articles.forEach(article => {
+                const newsItem = document.createElement('div');
+                newsItem.className = 'news-item';
+                
+                const publishedDate = article.published_at ? new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                const title = (article.title || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const snippet = article.snippet ? (article.snippet || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;') : '';
+                const url = (article.url || '#').replace(/"/g, '&quot;');
+                const source = (article.source || 'Unknown').replace(/"/g, '&quot;');
+                
+                newsItem.innerHTML = `
+                  <div class="news-content">
+                    <h6 class="news-title">
+                      <a href="${url}" target="_blank" rel="noopener noreferrer">
+                        ${title}
+                      </a>
+                    </h6>
+                    ${snippet ? `<p class="news-snippet">${snippet}</p>` : ''}
+                    <div class="news-meta">
+                      <span class="news-source">${source}</span>
+                      ${publishedDate ? `<span class="news-date">${publishedDate}</span>` : ''}
+                    </div>
+                  </div>
+                `;
+                
+                newsFeedContainer.appendChild(newsItem);
+              });
+            } else {
+              newsFeedContainer.innerHTML = '<div class="news-item"><p class="text-muted">No news available at the moment.</p></div>';
+            }
+            
+            // Re-enable button and hide loading
+            refreshBtn.disabled = false;
+            refreshBtn.classList.remove('refreshing');
+            newsFeedContainer.style.opacity = '1';
+            newsLoading.style.display = 'none';
+          })
+          .catch(error => {
+            console.error('Error refreshing news:', error);
+            newsFeedContainer.innerHTML = '<div class="news-item"><p class="text-muted">Error loading news. Please try again.</p></div>';
+            refreshBtn.disabled = false;
+            refreshBtn.classList.remove('refreshing');
+            newsFeedContainer.style.opacity = '1';
+            newsLoading.style.display = 'none';
+          });
+        });
+      }
+    })();
+  </script>
+  {% endif %}
+</body>
+</html>

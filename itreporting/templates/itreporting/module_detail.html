@@ -1,0 +1,217 @@
+{% extends "itreporting/base.html" %}
+
+{% block content %}
+<div class="content-section">
+    <div class="module-detail-header category-{{ module.category|lower }}">
+        <div class="module-detail-content">
+            <a href="{% url 'itreporting:module-list' %}" class="btn btn-light btn-sm mb-3">
+                ← Back to Modules
+            </a>
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="mb-2">{{ module.code }} - {{ module.name }}</h1>
+                    <p class="mb-0 module-header-subtitle">Module Details and Information</p>
+                </div>
+                <span class="badge {% if module.availability == 'open' %}bg-success{% else %}bg-secondary{% endif %} fs-6">
+                    {{ module.get_availability_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Module Information Card -->
+            <div class="module-info-card category-{{ module.category|lower }}">
+                <div class="card-header">
+                    <h4 class="mb-0">📋 Module Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="module-info-row">
+                                <strong class="module-info-label">Module Code:</strong> 
+                                <span class="text-primary fw-bold ms-2">{{ module.code }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="module-info-row">
+                                <strong class="module-info-label">Credits:</strong> 
+                                <span class="text-primary fw-bold ms-2">{{ module.credit }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="module-info-row">
+                                <strong class="module-info-label">Category:</strong> 
+                                <span class="category-badge {{ module.category|lower }} ms-2">
+                                    {{ module.get_category_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="module-info-row">
+                                <strong class="module-info-label">Status:</strong> 
+                                <span class="badge {% if module.availability == 'open' %}bg-success{% else %}bg-secondary{% endif %} ms-2">
+                                    {{ module.get_availability_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <h5 class="mb-3 fw-bold">Description</h5>
+                        <p class="module-description-text" style="white-space: pre-line; line-height: 1.8;">{{ module.description }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses Allowed Card -->
+            {% if module.courses_allowed.all %}
+                <div class="module-info-card">
+                    <div class="card-header">
+                        <h4 class="mb-0">🎓 Courses Allowed to Register</h4>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for course in module.courses_allowed.all %}
+                                <div class="course-list-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-semibold">{{ course.name }}</span>
+                                        <small class="course-group-label">Course Group</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="module-info-card">
+                    <div class="card-body">
+                        <p class="module-available-text mb-0">
+                            <em>This module is available for all courses.</em>
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="module-quick-info-card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Info</h5>
+                </div>
+                <div class="card-body">
+                    <div class="module-quick-info-item">
+                        <div class="module-quick-info-label">Module Code</div>
+                        <div class="module-quick-info-value fw-bold text-primary">{{ module.code }}</div>
+                    </div>
+                    <div class="module-quick-info-item">
+                        <div class="module-quick-info-label">Credits</div>
+                        <div class="module-quick-info-value fw-bold text-primary">{{ module.credit }}</div>
+                    </div>
+                    <div class="module-quick-info-item">
+                        <div class="module-quick-info-label">Category</div>
+                        <div class="module-quick-info-value">
+                            <span class="category-badge {{ module.category|lower }}">
+                                {{ module.get_category_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="module-quick-info-item">
+                        <div class="module-quick-info-label">Availability</div>
+                        <div class="module-quick-info-value">
+                            <span class="badge {% if module.availability == 'open' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ module.get_availability_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="module-quick-info-item">
+                        <div class="module-quick-info-label">Created</div>
+                        <div class="module-quick-info-value">
+                            <small class="module-date-text">{{ module.created_at|date:"F d, Y" }}</small>
+                        </div>
+                    </div>
+                    <div class="module-quick-info-item">
+                        <div class="module-quick-info-label">Last Updated</div>
+                        <div class="module-quick-info-value">
+                            <small class="module-date-text">{{ module.updated_at|date:"F d, Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrollment Actions -->
+            {% if user.is_authenticated and not user.is_staff %}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">Module Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if is_enrolled %}
+                            {% if registration.status == 'enrolled' %}
+                                <p class="text-success mb-3">
+                                    <strong>✓ You are enrolled in this module</strong><br>
+                                    <small>Registered on: {{ registration.date_registered|date:"F d, Y" }}</small>
+                                </p>
+                                {% if not has_submission %}
+                                    <a href="{% url 'itreporting:module-submit' module.pk %}" class="btn btn-primary w-100 mb-2">
+                                        📤 Submit Assignment
+                                    </a>
+                                {% else %}
+                                    <p class="text-info mb-2">
+                                        <small>✓ Submission uploaded on {{ registration.submission.submitted_at|date:"F d, Y" }}</small>
+                                    </p>
+                                    <a href="{% url 'itreporting:module-submit' module.pk %}" class="btn btn-outline-primary w-100 mb-2">
+                                        📝 Update Submission
+                                    </a>
+                                {% endif %}
+                                <a href="{% url 'itreporting:module-cancel' module.pk %}" class="btn btn-outline-danger w-100" 
+                                   onclick="return confirm('Are you sure you want to cancel your enrollment?');">
+                                    ❌ Cancel Enrollment
+                                </a>
+                            {% elif registration.status == 'completed' %}
+                                <p class="text-success mb-0">
+                                    <strong>✓ Module Completed</strong><br>
+                                    <small>Completed on: {{ registration.completed_at|date:"F d, Y"|default:"N/A" }}</small>
+                                </p>
+                            {% elif registration.status == 'cancelled' %}
+                                <p class="text-muted mb-3">
+                                    <strong>Enrollment Cancelled</strong>
+                                </p>
+                                <a href="{% url 'itreporting:module-enroll' module.pk %}" class="btn btn-primary w-100">
+                                    Re-enroll in Module
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            {% if module.is_available %}
+                                <a href="{% url 'itreporting:module-enroll' module.pk %}" class="btn btn-success w-100">
+                                    ➕ Enroll in Module
+                                </a>
+                            {% else %}
+                                <p class="text-muted mb-0">
+                                    <em>This module is currently closed for registration.</em>
+                                </p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if user.is_staff %}
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <a href="/admin/itreporting/module/{{ module.pk }}/change/" class="btn btn-warning btn-sm w-100">
+                            Edit Module (Admin)
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}
+

@@ -1,0 +1,130 @@
+{% extends "itreporting/base.html" %}
+
+{% block content %}
+<div class="content-section">
+    <div class="module-list-header">
+        <h1 class="mb-2">📚 Available Modules</h1>
+        <p class="mb-0 opacity-75">Browse and explore all available course modules</p>
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="module-filter-card">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="category" class="form-label">Filter by Category:</label>
+                <select name="category" id="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for value, label in categories %}
+                        <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="availability" class="form-label">Filter by Availability:</label>
+                <select name="availability" id="availability" class="form-select">
+                    <option value="">All Modules</option>
+                    {% for value, label in availability_choices %}
+                        <option value="{{ value }}" {% if request.GET.availability == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
+                <a href="{% url 'itreporting:module-list' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modules List -->
+    {% if modules %}
+        <div class="row">
+            {% for module in modules %}
+                <div class="col-md-6 mb-4">
+                    <div class="module-card category-{{ module.category|lower }}">
+                        <div class="module-card-header">
+                            <h5>{{ module.code }}</h5>
+                            <span class="badge {% if module.availability == 'open' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ module.get_availability_display }}
+                            </span>
+                        </div>
+                        <div class="module-card-body">
+                            <h4 class="module-card-title">{{ module.name }}</h4>
+                            <div class="module-card-meta">
+                                <span class="category-badge {{ module.category|lower }}">
+                                    {{ module.get_category_display }}
+                                </span>
+                                <span class="module-credits-text">
+                                    <strong>{{ module.credit }}</strong> credits
+                                </span>
+                            </div>
+                            <p class="module-card-description">{{ module.description|truncatewords:30 }}</p>
+                            {% if module.courses_allowed.all %}
+                                <p class="mb-2">
+                                    <small class="module-courses-text">
+                                        <strong>Available for:</strong>
+                                        {% for course in module.courses_allowed.all %}
+                                            {{ course.name }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </small>
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div class="module-card-footer">
+                            <a href="{% url 'itreporting:module-detail' module.pk %}" class="btn btn-outline-primary btn-sm">
+                                View Details →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+            <nav aria-label="Module pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.availability %}&availability={{ request.GET.availability }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.availability %}&availability={{ request.GET.availability }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.availability %}&availability={{ request.GET.availability }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.availability %}&availability={{ request.GET.availability }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.availability %}&availability={{ request.GET.availability }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info">
+            <h4>No modules found</h4>
+            <p>There are no modules available at the moment. Please check back later.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
