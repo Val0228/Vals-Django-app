@@ -1,19 +1,148 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>IT Issues Reported</title>
-</head>
-<body>
-<h1>IT Issues Reported</h1>
-    <article class="media content-section">
-<div class="media-body">
-    <div class="article-metadata">
-        <a class="mr-2" href="#">{{ object.author.profile}}</a>
-        <small class="text-muted">{{ object.date_submitted}}</small>
-    </div>
-       <h2 class="article-title">{{ object.type }} Issue in Room{{object.room}}</h2>
-     <p class="article-content">{{ object.details }}</p>
+{% extends "itreporting/base.html" %}
+
+{% block content %}
+<!-- Back Button -->
+<div class="mb-3">
+    <a href="{% url 'itreporting:report' %}" class="btn btn-outline-secondary">
+        ← Back to Issues
+    </a>
 </div>
-  </article>
-</body>
-</html>
+
+<!-- Issue Detail Card -->
+<div class="issue-detail-card">
+    <div class="issue-detail-header">
+        <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
+            <div>
+                <span class="issue-type-badge issue-type-{{ object.type|lower }}">
+                    {{ object.type }}
+                </span>
+                {% if object.urgent %}
+                    <span class="urgent-badge">🚨 URGENT</span>
+                {% endif %}
+            </div>
+            <div class="text-end">
+                <small class="text-muted d-block">
+                    <strong>Reported:</strong> {{ object.date_submitted|date:"F d, Y • h:i A" }}
+                </small>
+                {% if object.date_submitted|date:"Y-m-d" != object.date_submitted|date:"Y-m-d" %}
+                    <small class="text-muted d-block">
+                        <strong>Last Updated:</strong> {{ object.date_submitted|date:"F d, Y • h:i A" }}
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+        <h1 class="issue-detail-title">
+            {{ object.type }} Issue in {{ object.room }}
+        </h1>
+    </div>
+
+    <div class="issue-detail-body">
+        <!-- Issue Information Grid -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="info-box">
+                    <div class="info-box-icon">📍</div>
+                    <div class="info-box-content">
+                        <h5>Location</h5>
+                        <p class="mb-0">{{ object.room }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="info-box">
+                    <div class="info-box-icon">👤</div>
+                    <div class="info-box-content">
+                        <h5>Reported By</h5>
+                        <p class="mb-0">{{ object.author.get_full_name|default:object.author.username }}</p>
+                        <small class="text-muted">{{ object.author.email }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="info-box">
+                    <div class="info-box-icon">📅</div>
+                    <div class="info-box-content">
+                        <h5>Date Submitted</h5>
+                        <p class="mb-0">{{ object.date_submitted|date:"F d, Y" }}</p>
+                        <small class="text-muted">{{ object.date_submitted|date:"h:i A" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="info-box">
+                    <div class="info-box-icon">⚡</div>
+                    <div class="info-box-content">
+                        <h5>Priority</h5>
+                        <p class="mb-0">
+                            {% if object.urgent %}
+                                <span class="badge bg-danger">Urgent</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Normal</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issue Details Section -->
+        <div class="issue-details-section">
+            <h3 class="section-title">📝 Issue Details</h3>
+            <div class="issue-details-content">
+                <p>{{ object.details|linebreaks }}</p>
+            </div>
+        </div>
+
+        <!-- Description Section (if exists) -->
+        {% if object.description %}
+            <div class="issue-description-section mt-4">
+                <h3 class="section-title">📋 Additional Description</h3>
+                <div class="issue-description-content">
+                    <p>{{ object.description|linebreaks }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="issue-actions-section mt-4 pt-4 border-top">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'itreporting:report' %}" class="btn btn-outline-secondary">
+                    ← Back to All Issues
+                </a>
+                {% if user == object.author or user.is_staff %}
+                    <a href="{% url 'itreporting:issue-update' object.pk %}" class="btn btn-primary">
+                        ✏️ Edit Issue
+                    </a>
+                    <a href="{% url 'itreporting:issue-delete' object.pk %}" class="btn btn-outline-danger">
+                        🗑️ Delete Issue
+                    </a>
+                {% endif %}
+                {% if user.is_authenticated and user != object.author %}
+                    <a href="{% url 'itreporting:issue-create' %}" class="btn btn-outline-primary">
+                        ➕ Report Similar Issue
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Related Issues (if any) -->
+{% if user.is_authenticated %}
+    <div class="related-issues-card mt-4">
+        <h4>🔗 Quick Actions</h4>
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <a href="{% url 'itreporting:issue-create' %}" class="btn btn-outline-primary w-100">
+                    ➕ Report New Issue
+                </a>
+            </div>
+            <div class="col-md-6 mb-2">
+                <a href="{% url 'itreporting:report' %}" class="btn btn-outline-secondary w-100">
+                    📋 View All Issues
+                </a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

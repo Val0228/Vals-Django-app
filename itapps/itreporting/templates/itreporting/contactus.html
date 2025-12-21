@@ -1,6 +1,165 @@
 {% extends "itreporting/base.html" %}
-     {% block content %}
-      <h1>Welcome to Contact Us Page</h1>
-     {% endblock %}
- </body>
-</html>
+{% load crispy_forms_tags %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="contact-header">
+    <h1>Contact Us</h1>
+    <p class="lead">We're here to help! Get in touch with us for any questions or enquiries.</p>
+</div>
+
+<!-- Internal Navigation -->
+<div class="contact-nav-section">
+    <div class="contact-nav-card">
+        <h4>Quick Navigation</h4>
+        <nav class="contact-nav">
+            <a href="#contact-form" class="contact-nav-link">Contact Form</a>
+            <a href="#information" class="contact-nav-link">Contact Information</a>
+            <a href="#faq" class="contact-nav-link">FAQ</a>
+        </nav>
+    </div>
+</div>
+
+<!-- Section 1: Contact Form -->
+<section id="contact-form" class="contact-section">
+    <div class="contact-form-card">
+        <div class="contact-section-header">
+            <h2>📧 Send Us a Message</h2>
+            <p>Fill out the form below and we'll get back to you as soon as possible.</p>
+        </div>
+        <div class="contact-section-body">
+            <form method="POST" class="contact-form">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger small">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.subject.id_for_label }}" class="form-label">{{ form.subject.label }}</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                        <div class="text-danger small">{{ form.subject.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.message.id_for_label }}" class="form-label">{{ form.message.label }}</label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                        <div class="text-danger small">{{ form.message.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                    <button type="reset" class="btn btn-outline-secondary btn-lg ms-2">Clear Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2: Contact Information -->
+<section id="information" class="contact-section">
+    <div class="contact-info-card">
+        <div class="contact-section-header">
+            <h2>📍 Contact Information</h2>
+        </div>
+        <div class="contact-section-body">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="info-item">
+                        <div class="info-icon">📧</div>
+                        <h4>Email</h4>
+                        <p>General Enquiries: <a href="mailto:info@shu.ac.uk">info@shu.ac.uk</a></p>
+                        <p>Student Support: <a href="mailto:support@shu.ac.uk">support@shu.ac.uk</a></p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="info-item">
+                        <div class="info-icon">📞</div>
+                        <h4>Phone</h4>
+                        <p>Main Office: <a href="tel:+441142253555">+44 (0)114 225 3555</a></p>
+                        <p>Student Services: <a href="tel:+441142253000">+44 (0)114 225 3000</a></p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="info-item">
+                        <div class="info-icon">📍</div>
+                        <h4>Address</h4>
+                        <p>Sheffield Hallam University<br>
+                        City Campus<br>
+                        Howard Street<br>
+                        Sheffield S1 1WB<br>
+                        United Kingdom</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6 mb-3">
+                    <div class="info-item">
+                        <div class="info-icon">🕒</div>
+                        <h4>Office Hours</h4>
+                        <p>Monday - Friday: 9:00 AM - 5:00 PM (GMT)<br>
+                        Saturday: 10:00 AM - 2:00 PM (GMT)<br>
+                        Sunday: Closed</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="info-item">
+                        <div class="info-icon">⚡</div>
+                        <h4>Response Time</h4>
+                        <p>We aim to respond to all enquiries within 24-48 hours during business days. For urgent matters, please call our support line.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 3: FAQ -->
+<section id="faq" class="contact-section">
+    <div class="contact-faq-card">
+        <div class="contact-section-header">
+            <h2>❓ Frequently Asked Questions</h2>
+        </div>
+        <div class="contact-section-body">
+            <div class="faq-item">
+                <h4>How do I enroll in a module?</h4>
+                <p>You can browse all available modules on our <a href="{% url 'itreporting:module-list' %}">Modules page</a>. Once you find a module you're interested in, simply click "Enroll in Module" on the module detail page. Make sure you're logged in to your student account.</p>
+            </div>
+            <div class="faq-item">
+                <h4>How do I submit an assignment?</h4>
+                <p>After enrolling in a module, you'll see a "Submit Assignment" button on the module detail page. Click it to upload your file and add any additional notes. You can update your submission at any time.</p>
+            </div>
+            <div class="faq-item">
+                <h4>What file formats are accepted for submissions?</h4>
+                <p>We accept PDF, DOC, DOCX, ZIP, RAR, and TXT file formats. Maximum file size is 10MB.</p>
+            </div>
+            <div class="faq-item">
+                <h4>How are credits calculated?</h4>
+                <p>Credits are awarded upon completion of modules. You need 50 credits to pass the year, 65 credits for a 2:1 classification, and all modules completed for a 1st class degree.</p>
+            </div>
+            <div class="faq-item">
+                <h4>Can I cancel my enrollment?</h4>
+                <p>Yes, you can cancel your enrollment at any time by visiting the module detail page and clicking "Cancel Enrollment". Please note that this action cannot be undone.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Back to Top -->
+<div class="text-center mt-4">
+    <a href="#contact-form" class="btn btn-outline-primary">Back to Top ↑</a>
+</div>
+{% endblock %}

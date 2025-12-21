@@ -16,8 +16,11 @@ type="submit">Login</button>
 </form>
 <div class="border-top pt-3">
 <small class="text-muted">
-You need to create an account?<a class="ml-2" href="{% url 'login'
-%}">Login</a>
+Need to create an account? <a class="ml-2" href="{% url 'register' %}">Register here</a>
+</small>
+<br>
+<small class="text-muted">
+Forgot your password? <a class="ml-2" href="{% url 'password_reset' %}">Reset Password</a>
 </small>
 </div>
 </div>

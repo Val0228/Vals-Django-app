@@ -2,29 +2,200 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-<h1>{{ user.username }}</h1>
-
-<!-- REMOVE this line -->
-{# <img> {{user.img}} </img> #}
-
-<!-- Correct profile image -->
-<img 
-    src="{{ user.profile.image.url }}" 
-    alt="Profile Picture"
-    class="img-thumbnail"
-    style="width:150px; height:150px; object-fit:cover;"
->
-
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <fieldset class="form-group">
-        <legend class="border-bottom mb-4">Student IT Services - Profile Details</legend>
-        {{ u_form|crispy }} 
-        {{ p_form|crispy }} 
-    </fieldset>
-    <div class="form-group">
-        <button class="btn btn-outline-info" type="submit">Update</button>
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="media d-flex align-items-center">
+        {% if user.profile.image %}
+        <img 
+            src="{{ user.profile.image.url }}" 
+            alt="Profile Picture"
+            class="profile-avatar mr-4"
+        >
+        {% else %}
+        <div class="profile-avatar mr-4 d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.2);">
+            <span style="font-size: 3rem;">👤</span>
+        </div>
+        {% endif %}
+        <div class="media-body">
+            <h2 class="account-heading">{{ user.get_full_name|default:user.username }}</h2>
+            <p class="text-secondary mb-0">{{ user.email }}</p>
+            <small class="text-white-50">Student Account</small>
+        </div>
     </div>
-</form>
+</div>
+
+<!-- Student Information Card -->
+<div class="student-info-card">
+    <div class="card-header">
+        <h4 class="mb-0">📋 Student Information</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="info-row">
+                    <span class="info-label">Username:</span>
+                    <span class="info-value">{{ user.username }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">First Name:</span>
+                    <span class="info-value">{{ user.first_name|default:"Not provided" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Name:</span>
+                    <span class="info-value">{{ user.last_name|default:"Not provided" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ user.email|default:"Not provided" }}</span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-row">
+                    <span class="info-label">Date of Birth:</span>
+                    <span class="info-value">{{ user.profile.date_of_birth|date:"F d, Y"|default:"Not provided" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Address:</span>
+                    <span class="info-value">{{ user.profile.address|default:"Not provided" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">City/Town:</span>
+                    <span class="info-value">{{ user.profile.city|default:"Not provided" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Country:</span>
+                    <span class="info-value">{{ user.profile.country|default:"Not provided" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Academic Progress Card -->
+<div class="student-info-card">
+    <div class="card-header">
+        <h4 class="mb-0">🎓 Academic Progress</h4>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-4 text-center">
+                <h3 class="text-primary mb-1">{{ total_credits }}</h3>
+                <p class="text-muted mb-0">Total Credits</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <h3 class="text-success mb-1">{{ completed_count }}</h3>
+                <p class="text-muted mb-0">Completed Modules</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <h3 class="text-info mb-1">{{ enrolled_modules.count }}</h3>
+                <p class="text-muted mb-0">Enrolled Modules</p>
+            </div>
+        </div>
+        <hr>
+        <div class="text-center">
+            <h5>Degree Classification</h5>
+            <span class="badge bg-{{ degree_color }} fs-5 px-4 py-2">
+                {{ degree_classification }}
+            </span>
+            <p class="text-muted mt-2 mb-0">
+                {% if total_credits >= 50 %}
+                    Progress: {{ total_credits }} / 50+ credits (Pass achieved)
+                {% else %}
+                    Progress: {{ total_credits }} / 50 credits ({{ credits_remaining }} credits remaining)
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Enrolled Modules Card -->
+{% if enrollments %}
+    <div class="student-info-card">
+        <div class="card-header">
+            <h4 class="mb-0">📚 My Modules</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Module Code</th>
+                            <th>Module Name</th>
+                            <th>Category</th>
+                            <th>Credits</th>
+                            <th>Status</th>
+                            <th>Date Registered</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                            <tr>
+                                <td><strong>{{ enrollment.module.code }}</strong></td>
+                                <td>{{ enrollment.module.name }}</td>
+                                <td>
+                                    <span class="category-badge {{ enrollment.module.category|lower }}">
+                                        {{ enrollment.module.get_category_display }}
+                                    </span>
+                                </td>
+                                <td>{{ enrollment.module.credit }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if enrollment.status == 'completed' %}bg-success
+                                        {% elif enrollment.status == 'enrolled' %}bg-primary
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ enrollment.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ enrollment.date_registered|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="{% url 'itreporting:module-detail' enrollment.module.pk %}" class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                    {% if enrollment.status == 'enrolled' %}
+                                        {% if not enrollment.submission %}
+                                            <a href="{% url 'itreporting:module-submit' enrollment.module.pk %}" class="btn btn-sm btn-outline-success">
+                                                Submit
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'itreporting:module-submit' enrollment.module.pk %}" class="btn btn-sm btn-outline-info">
+                                                Update
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="student-info-card">
+        <div class="card-body text-center">
+            <p class="text-muted mb-0">You haven't enrolled in any modules yet. <a href="{% url 'itreporting:module-list' %}">Browse available modules</a></p>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Update Form -->
+<div class="profile-form-section">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <fieldset class="form-group">
+            <legend>✏️ Update Profile Details</legend>
+            <h5>User Information</h5>
+            {{ u_form|crispy }}
+            <h5>Student Information</h5>
+            {{ p_form|crispy }}
+        </fieldset>
+        <div class="form-group mt-4">
+            <button class="btn btn-primary btn-lg" type="submit">
+                <i class="bi bi-check-circle"></i> Update Profile
+            </button>
+        </div>
+    </form>
+</div>
 
 {% endblock content %}

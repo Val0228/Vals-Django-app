@@ -1,21 +1,59 @@
 {% extends "itreporting/base.html" %}
-{% load crispy_forms_tags %}0
+{% load crispy_forms_tags %}
 {% block content %}
-<div class="content-section">
-<form method="POST">
-{% csrf_token %}
-<fieldset class="form-group">
-<legend class="border-bottom mb-4">Student Registration Form</legend>
-{{ form | crispy }}
-</fieldset>
-<div class="form-group">
-<button class="btn btn-outline-info" type="submit">Register</button>
-</div>
-</form>
-<div class="border-top pt-3">
-<small class="text-muted">
-    Already Registered? <a class="ml-2" href="#">Login</a>
-</small>
-</div>
+<div class="registration-section">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <fieldset class="form-group">
+            <legend>🎓 Student Registration</legend>
+            <h5>Account Information</h5>
+            {{ form.username|as_crispy_field }}
+            {{ form.email|as_crispy_field }}
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.first_name|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.last_name|as_crispy_field }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.password1|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.password2|as_crispy_field }}
+                </div>
+            </div>
+            <h5>Student Information</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.date_of_birth|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.image|as_crispy_field }}
+                </div>
+            </div>
+            {{ form.address|as_crispy_field }}
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.city|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.country|as_crispy_field }}
+                </div>
+            </div>
+        </fieldset>
+        <div class="form-group mt-4">
+            <button class="btn btn-primary btn-lg w-100" type="submit">
+                Create Student Account
+            </button>
+        </div>
+    </form>
+    <div class="border-top pt-3 mt-4 text-center">
+        <small class="text-muted">
+            Already Registered? <a class="ml-2" href="{% url 'login' %}">Login Here</a>
+        </small>
+    </div>
 </div>
 {% endblock content %}

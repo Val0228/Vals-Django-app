@@ -80,6 +80,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'itreporting.context_processors.news_feed',
             ],
         },
     },
@@ -91,25 +92,30 @@ WSGI_APPLICATION = 'itapps.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = { 
-
-    'default': { 
-
-        'ENGINE': 'django.db.backends.mysql', 
-        'NAME': os.environ['AZURE_DB_NAME'], 
-        'HOST': os.environ['AZURE_DB_HOST'], 
-        'PORT': os.environ['AZURE_DB_PORT'], 
-        'USER': os.environ['AZURE_DB_USER'], 
-        'PASSWORD': os.environ['AZURE_DB_PASSWORD'], 
-        'PORT': os.environ['AZURE_DB_PORT'],
-        'OPTIONS': {
-            'ssl': {
-                'ca': '/etc/ssl/certs/ca-certificates.crt',
+# Use Azure MySQL if environment variables are set, otherwise use SQLite for local development
+if 'AZURE_DB_NAME' in os.environ:
+    DATABASES = { 
+        'default': { 
+            'ENGINE': 'django.db.backends.mysql', 
+            'NAME': os.environ['AZURE_DB_NAME'], 
+            'HOST': os.environ['AZURE_DB_HOST'], 
+            'PORT': os.environ['AZURE_DB_PORT'], 
+            'USER': os.environ['AZURE_DB_USER'], 
+            'PASSWORD': os.environ['AZURE_DB_PASSWORD'], 
+            'OPTIONS': {
+                'ssl': {
+                    'ca': '/etc/ssl/certs/ca-certificates.crt',
+                },
             },
-        },
+        }
     }
-     
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 
@@ -137,11 +143,19 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'  # Changed to UK timezone
 
 USE_I18N = True
 
 USE_TZ = True
+
+# Cache configuration for weather API
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
 
 
 # Static files (CSS, JavaScript, Images)
@@ -157,33 +171,74 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap4'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 LOGIN_REDIRECT_URL = 'itreporting:home'
-LOGIN_URL = 'login' #Repalced with the line 134 below 
-#MEDIA_ROOT = BASE_DIR / 'media' (OLD)
-#MEDIA_URL = '/media/' (OLD)
-LOGIN_URL = 'itreporting:home'
+LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'itreporting:home'
 
-AZURE_SA_NAME = os.environ['AZURE_SA_NAME']
-AZURE_SA_KEY = os.environ['AZURE_SA_KEY']
+# Use Azure Storage if environment variables are set, otherwise use local file storage
+if 'AZURE_SA_NAME' in os.environ and 'AZURE_SA_KEY' in os.environ:
+    AZURE_SA_NAME = os.environ['AZURE_SA_NAME']
+    AZURE_SA_KEY = os.environ['AZURE_SA_KEY']
 
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.azure_storage.AzureStorage",
-        "OPTIONS": {
-            "account_name": AZURE_SA_NAME,
-            "account_key": AZURE_SA_KEY,
-            "azure_container": "media",
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            "OPTIONS": {
+                "account_name": AZURE_SA_NAME,
+                "account_key": AZURE_SA_KEY,
+                "azure_container": "media",
+            },
         },
-    },
-    "staticfiles": {
-        "BACKEND": "storages.backends.azure_storage.AzureStorage",
-        "OPTIONS": {
-            "account_name": AZURE_SA_NAME,
-            "account_key": AZURE_SA_KEY,
-            "azure_container": "static",
+        "staticfiles": {
+            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            "OPTIONS": {
+                "account_name": AZURE_SA_NAME,
+                "account_key": AZURE_SA_KEY,
+                "azure_container": "static",
+            },
         },
-    },
-}
+    }
 
-STATIC_URL = f'https://{AZURE_SA_NAME}.blob.core.windows.net/static/'
+    STATIC_URL = f'https://{AZURE_SA_NAME}.blob.core.windows.net/static/'
+    MEDIA_URL = f'https://{AZURE_SA_NAME}.blob.core.windows.net/media/'
+else:
+    # Local file storage
+    STATIC_URL = '/static/'
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+    
+    MEDIA_ROOT = BASE_DIR / 'media'
+    MEDIA_URL = '/media/'
 
-MEDIA_URL = f'https://{AZURE_SA_NAME}.blob.core.windows.net/media/'
+# OpenWeatherMap API Key
+OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY')
+
+# Email Configuration
+# If SMTP credentials are provided, use SMTP backend (for real emails)
+# Otherwise, use console backend (emails printed to console) in development
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    # Use SMTP backend when credentials are provided
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+    EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() == 'true'
+else:
+    # Use console backend in development (emails printed to console/terminal)
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Default email address for sending emails
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'noreply@studentitservices.com')
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+# Site domain for password reset links
+# In development, use localhost. In production, use your actual domain
+if DEBUG:
+    # For local development
+    SITE_DOMAIN = os.environ.get('SITE_DOMAIN', 'localhost:8000')
+    SITE_PROTOCOL = 'http'
+else:
+    # For production
+    SITE_DOMAIN = os.environ.get('SITE_DOMAIN', WEBSITE_HOSTNAME or 'yourdomain.com')
+    SITE_PROTOCOL = 'https'

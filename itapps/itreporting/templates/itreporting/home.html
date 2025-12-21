@@ -1,6 +1,226 @@
 {% extends "itreporting/base.html" %}
-     {% block content %}
-      <h1>Welcome to the homepage</h1>
-     {% endblock %}
- </body>
-</html>
+
+{% block content %}
+<!-- Hero Section -->
+<div class="home-hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Welcome to UNI of Online Learning</h1>
+        <p class="hero-subtitle">
+            {% if user.is_authenticated %}
+                Hello, {{ user.get_full_name|default:user.username }}! Ready to continue your learning journey?
+            {% else %}
+                Your gateway to quality online education. Start your learning journey today!
+            {% endif %}
+        </p>
+        {% if not user.is_authenticated %}
+            <div class="hero-actions">
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-2">Get Started</a>
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">Login</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Navigation Cards -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="nav-card hover-lift">
+            <div class="nav-card-icon">📚</div>
+            <h3>Browse Modules</h3>
+            <p>Explore all available course modules and find what interests you</p>
+            <a href="{% url 'itreporting:module-list' %}" class="btn btn-primary">View Modules →</a>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="nav-card hover-lift">
+            <div class="nav-card-icon">📝</div>
+            <h3>Report Issues</h3>
+            <p>Report IT issues or problems you're experiencing</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'itreporting:issue-create' %}" class="btn btn-primary">Report Issue →</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline-primary">Login to Report →</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="nav-card hover-lift">
+            <div class="nav-card-icon">👤</div>
+            <h3>Your Profile</h3>
+            <p>Manage your profile and track your academic progress</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile' %}" class="btn btn-primary">View Profile →</a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-outline-primary">Create Account →</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- User Dashboard (if logged in) -->
+{% if user.is_authenticated %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="dashboard-card">
+                <div class="dashboard-header">
+                    <h2>📊 Your Dashboard</h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="stat-box">
+                            <div class="stat-number text-primary">{{ user_enrollments.count }}</div>
+                            <div class="stat-label">Enrolled Modules</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="stat-box">
+                            <div class="stat-number text-success">{{ completed_count }}</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="stat-box">
+                            <div class="stat-number text-info">{{ total_credits }}</div>
+                            <div class="stat-label">Total Credits</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center mb-3">
+                        <div class="stat-box">
+                            <div class="stat-number text-warning">{{ open_modules }}</div>
+                            <div class="stat-label">Available Modules</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Enrollments -->
+    {% if user_enrollments %}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="dashboard-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>📖 My Enrolled Modules</h3>
+                        <a href="{% url 'itreporting:module-list' %}" class="btn btn-outline-primary btn-sm">View All</a>
+                    </div>
+                    <div class="row">
+                        {% for enrollment in user_enrollments %}
+                            <div class="col-md-6 mb-3">
+                                <div class="enrollment-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="mb-1">{{ enrollment.module.code }}</h5>
+                                            <p class="mb-1">{{ enrollment.module.name }}</p>
+                                            <small class="text-muted">Enrolled: {{ enrollment.date_registered|date:"M d, Y" }}</small>
+                                        </div>
+                                        <span class="category-badge {{ enrollment.module.category|lower }}">
+                                            {{ enrollment.module.get_category_display }}
+                                        </span>
+                                    </div>
+                                    <div class="mt-2">
+                                        <a href="{% url 'itreporting:module-detail' enrollment.module.pk %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                        {% if not enrollment.submission %}
+                                            <a href="{% url 'itreporting:module-submit' enrollment.module.pk %}" class="btn btn-sm btn-outline-success">Submit</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+
+<!-- Featured Modules -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>🌟 Featured Modules</h3>
+                <a href="{% url 'itreporting:module-list' %}" class="btn btn-outline-primary btn-sm">Browse All</a>
+            </div>
+            {% if recent_modules %}
+                <div class="row">
+                    {% for module in recent_modules %}
+                        <div class="col-md-4 mb-3">
+                            <div class="module-preview-card category-{{ module.category|lower }}">
+                                <div class="module-preview-header">
+                                    <h5>{{ module.code }}</h5>
+                                    <span class="category-badge {{ module.category|lower }}">
+                                        {{ module.get_category_display }}
+                                    </span>
+                                </div>
+                                <h6 class="mt-2">{{ module.name }}</h6>
+                                <p class="module-preview-description">{{ module.description|truncatewords:15 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">{{ module.credit }} credits</span>
+                                    <a href="{% url 'itreporting:module-detail' module.pk %}" class="btn btn-sm btn-primary">Learn More →</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No modules available at the moment.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Compact Weather Widget -->
+{% if weather %}
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="weather-widget-compact">
+                <div class="weather-widget-header">
+                    <span class="weather-widget-title">🌤️ Campus Weather</span>
+                    <a href="{% url 'itreporting:weather' %}" class="weather-widget-link" title="View full forecast">→</a>
+                </div>
+                <div class="weather-widget-content">
+                    <div class="weather-widget-main">
+                        <img src="{{ weather.icon_url }}" alt="{{ weather.description }}" class="weather-widget-icon">
+                        <div class="weather-widget-temp">
+                            <span class="temp-value">{{ weather.temperature }}</span>
+                            <span class="temp-unit">°C</span>
+                        </div>
+                    </div>
+                    <div class="weather-widget-info">
+                        <p class="weather-widget-desc">{{ weather.description }}</p>
+                        <p class="weather-widget-location">{{ weather.city }}, {{ weather.country }}</p>
+                        <div class="weather-widget-details">
+                            <span class="weather-detail-mini">💨 {{ weather.wind_speed }} km/h</span>
+                            <span class="weather-detail-mini">💧 {{ weather.humidity }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Quick Links -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="quick-links-card">
+            <h4>Quick Links</h4>
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'itreporting:module-list' %}" class="quick-link">📚 All Modules</a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'itreporting:report' %}" class="quick-link">📋 View Reports</a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'itreporting:aboutus' %}" class="quick-link">ℹ️ About Us</a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="{% url 'itreporting:contactus' %}" class="quick-link">📧 Contact</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

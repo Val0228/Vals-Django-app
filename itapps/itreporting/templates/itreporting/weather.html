@@ -1,0 +1,143 @@
+{% extends "itreporting/base.html" %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="weather-header">
+    <h1>🌤️ Campus Weather</h1>
+    <p class="lead">Current weather conditions and forecast for {{ city }}</p>
+</div>
+
+<!-- Weather Search Form -->
+<div class="weather-search-card mb-4">
+    <form method="GET" action="{% url 'itreporting:weather' %}" class="row g-3">
+        <div class="col-md-8">
+            <label for="city" class="form-label">City</label>
+            <input type="text" class="form-control" id="city" name="city" value="{{ city }}" placeholder="Enter city name">
+        </div>
+        <div class="col-md-4">
+            <label for="country" class="form-label">Country Code</label>
+            <input type="text" class="form-control" id="country" name="country" value="{{ country }}" placeholder="GB, US, etc." maxlength="2">
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">🔍 Get Weather</button>
+            <a href="{% url 'itreporting:weather' %}" class="btn btn-outline-secondary">Reset to Sheffield</a>
+        </div>
+    </form>
+</div>
+
+<!-- Current Weather -->
+{% if weather %}
+    <div class="weather-current-card mb-4">
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div class="weather-main-display">
+                    <img src="{{ weather.icon_url }}" alt="{{ weather.description }}" class="weather-icon-xl">
+                    <h1 class="weather-temp-large">{{ weather.temperature }}°C</h1>
+                    <h3 class="weather-desc-large">{{ weather.description }}</h3>
+                    <p class="text-muted">Feels like {{ weather.feels_like }}°C</p>
+                    <p class="weather-location">{{ weather.city }}, {{ weather.country }}</p>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <h3 class="mb-4">Weather Details</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="weather-detail-box">
+                            <div class="weather-detail-icon-large">💨</div>
+                            <div>
+                                <h5>Wind Speed</h5>
+                                <p class="mb-0">{{ weather.wind_speed }} km/h</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="weather-detail-box">
+                            <div class="weather-detail-icon-large">💧</div>
+                            <div>
+                                <h5>Humidity</h5>
+                                <p class="mb-0">{{ weather.humidity }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="weather-detail-box">
+                            <div class="weather-detail-icon-large">📊</div>
+                            <div>
+                                <h5>Pressure</h5>
+                                <p class="mb-0">{{ weather.pressure }} hPa</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="weather-detail-box">
+                            <div class="weather-detail-icon-large">👁️</div>
+                            <div>
+                                <h5>Visibility</h5>
+                                <p class="mb-0">{{ weather.visibility|default:"N/A" }} km</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="weather-detail-box">
+                            <div class="weather-detail-icon-large">🌅</div>
+                            <div>
+                                <h5>Sunrise</h5>
+                                <p class="mb-0">{{ weather.sunrise|date:"H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="weather-detail-box">
+                            <div class="weather-detail-icon-large">🌇</div>
+                            <div>
+                                <h5>Sunset</h5>
+                                <p class="mb-0">{{ weather.sunset|date:"H:i" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-warning">
+        <h4>⚠️ Weather Data Unavailable</h4>
+        <p>Unable to fetch weather data. Please check:</p>
+        <ul>
+            <li>OpenWeatherMap API key is configured in environment variables</li>
+            <li>City name and country code are correct</li>
+            <li>Internet connection is active</li>
+        </ul>
+        <p class="mb-0"><small>To get an API key, visit <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap</a> and sign up for a free account.</small></p>
+    </div>
+{% endif %}
+
+<!-- Weather Forecast -->
+{% if forecast %}
+    <div class="weather-forecast-card">
+        <h3 class="mb-4">📅 5-Day Forecast</h3>
+        <div class="row">
+            {% for day_forecast in forecast.forecast|slice:":5" %}
+                <div class="col-md-2 col-sm-4 col-6 mb-3">
+                    <div class="forecast-item">
+                        <p class="forecast-date">{{ day_forecast.datetime|date:"D, M d" }}</p>
+                        <img src="{{ day_forecast.icon_url }}" alt="{{ day_forecast.description }}" class="forecast-icon">
+                        <p class="forecast-temp">{{ day_forecast.temperature }}°C</p>
+                        <p class="forecast-desc">{{ day_forecast.description }}</p>
+                        <div class="forecast-details">
+                            <small>💧 {{ day_forecast.humidity }}%</small>
+                            <small>💨 {{ day_forecast.wind_speed }} km/h</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Back to Home -->
+<div class="text-center mt-4">
+    <a href="{% url 'itreporting:home' %}" class="btn btn-outline-primary">← Back to Home</a>
+</div>
+{% endblock %}
+
