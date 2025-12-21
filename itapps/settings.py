@@ -23,24 +23,33 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', '030415')
 
 WEBSITE_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME', None) 
-DEBUG = WEBSITE_HOSTNAME == None
 
+# Check if we're in Azure (production) by checking for Azure-specific environment variables
+# Azure sets WEBSITE_HOSTNAME automatically, but we can also check for other Azure vars
+IN_AZURE = bool(os.environ.get('AZURE_DB_NAME') or os.environ.get('WEBSITE_HOSTNAME'))
+DEBUG = not IN_AZURE
 
 if DEBUG: 
-
     ALLOWED_HOSTS = [] 
-
 else: 
-
-    ALLOWED_HOSTS = [WEBSITE_HOSTNAME] 
-
-    CSRF_TRUSTED_ORIGINS = [f'https://{WEBSITE_HOSTNAME}']
-
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+    # Allow Azure domains - works even if WEBSITE_HOSTNAME is not explicitly set
+    ALLOWED_HOSTS = [
+        '.azurewebsites.net',  # Allow all Azure Web App domains
+        'c2027394-cgaraaddfugnb5ce.uksouth-01.azurewebsites.net',  # Your specific domain
+    ]
+    
+    # Add WEBSITE_HOSTNAME if it exists
+    if WEBSITE_HOSTNAME:
+        ALLOWED_HOSTS.append(WEBSITE_HOSTNAME)
+    
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.azurewebsites.net',
+        'https://c2027394-cgaraaddfugnb5ce.uksouth-01.azurewebsites.net',
+    ]
+    
+    # Add WEBSITE_HOSTNAME to CSRF if it exists
+    if WEBSITE_HOSTNAME:
+        CSRF_TRUSTED_ORIGINS.append(f'https://{WEBSITE_HOSTNAME}')
 
 
 # Application definition
