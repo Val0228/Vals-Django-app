@@ -52,17 +52,30 @@ def home(request):
             'total_credits': total_credits,
         })
     
-    # Add weather data
-    weather_service = WeatherService()
-    weather_data = weather_service.get_weather_by_city("Sheffield", "GB")
-    context['weather'] = weather_data
+    # Add weather data with error handling
+    try:
+        weather_service = WeatherService()
+        weather_data = weather_service.get_weather_by_city("Sheffield", "GB")
+        context['weather'] = weather_data
+    except Exception as e:
+        # If weather fails, just continue without it
+        context['weather'] = None
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Weather service failed: {str(e)}")
     
     return render(request, 'itreporting/home.html', context)
 
 def aboutus(request):
-    # Add weather data
-    weather_service = WeatherService()
-    weather_data = weather_service.get_weather_by_city("Sheffield", "GB")
+    # Add weather data with error handling
+    try:
+        weather_service = WeatherService()
+        weather_data = weather_service.get_weather_by_city("Sheffield", "GB")
+    except Exception as e:
+        weather_data = None
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Weather service failed: {str(e)}")
     
     return render(request, 'itreporting/aboutus.html', {
         'title': 'About Us',

@@ -71,3 +71,5 @@ jobs:
             - DJANGO_SETTINGS_MODULE=itapps.settings
             # Sets the Gunicorn startup command using the correct WSGI path: itapps/wsgi.py
             - PYTHON_STARTUP_SCRIPT=gunicorn --bind 0.0.0.0 --workers 2 itapps.wsgi
+            # Run migrations on startup (optional - can also be done via Azure Console)
+            - SCM_COMMAND_IDLE_TIMEOUT=600
